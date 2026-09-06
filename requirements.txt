@@ -1,0 +1,12 @@
+Flask==3.1.1
+gunicorn==23.0.0
+pydantic==2.12.5
+python-dotenv==1.0.1
+requests==2.33.1
+
+# Google OAuth token-at-rest encryption (Phase 2; see app/auth/token_store.py)
+cryptography==46.0.6
+
+# Test tooling (Phase 0 test foundation; see master spec section 54)
+pytest==8.3.3
+pytest-cov==5.0.0
