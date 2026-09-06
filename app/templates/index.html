@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova AI // Next-Gen Voice Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030305;
+            --surface: rgba(18, 18, 26, 0.7);
+            --surface-solid: #12121a;
+            --border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.6);
+            --accent: #a855f7;
+            --accent-glow: rgba(168, 85, 247, 0.6);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(120px);
+            opacity: 0.4;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            will-change: transform;
+            animation: floatBlob 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .blob-1 {
+            width: 50vw;
+            height: 50vw;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            top: -20%;
+            left: -10%;
+        }
+
+        .blob-2 {
+            width: 45vw;
+            height: 45vw;
+            background: linear-gradient(135deg, #3b82f6, #ec4899);
+            bottom: -20%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(50px, 80px) scale(1.1); }
+            100% { transform: translate(-40px, 50px) scale(0.95); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            padding: 2.5rem;
+            background: var(--surface);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 10;
+            animation: containerEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes containerEntrance {
+            0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #818cf8;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+            animation: pulseBadge 3s infinite ease-in-out;
+        }
+
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(99, 102, 241, 0.15); }
+            50% { transform: scale(1.03); box-shadow: 0 0 25px rgba(99, 102, 241, 0.35); }
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background-color: #818cf8;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #818cf8;
+            animation: blinkDot 1.5s infinite;
+        }
+
+        @keyframes blinkDot {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .visualizer-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 2.5rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            animation: rotateRing 25s linear infinite;
+        }
+
+        .ring-2 {
+            inset: -15px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            animation: rotateRingRev 30s linear infinite;
+        }
+
+        @keyframes rotateRing {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes rotateRingRev {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        .mic-btn {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px var(--primary-glow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+        }
+
+        .mic-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 15px 40px var(--accent-glow);
+        }
+
+        .mic-btn:active {
+            transform: scale(0.95);
+        }
+
+        .mic-btn.listening {
+            animation: pulseMic 1.5s infinite;
+            background: linear-gradient(135deg, #ef4444, #f43f5e);
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.6);
+        }
+
+        @keyframes pulseMic {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .mic-btn svg {
+            width: 38px;
+            height: 38px;
+            fill: #ffffff;
+            transition: transform 0.3s ease;
+        }
+
+        .mic-btn:hover svg {
+            transform: scale(1.1);
+        }
+
+        .status-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .status-text {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .transcript {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            min-height: 1.5rem;
+            word-break: break-word;
+        }
+
+        .wave-bars {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            height: 24px;
+            margin-top: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .wave-bars.active {
+            opacity: 1;
+        }
+
+        .bar {
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to top, var(--primary), var(--accent));
+            border-radius: 4px;
+            animation: soundWave 1.2s infinite ease-in-out;
+        }
+
+        .bar:nth-child(2) { animation-delay: 0.1s; }
+        .bar:nth-child(3) { animation-delay: 0.2s; }
+        .bar:nth-child(4) { animation-delay: 0.3s; }
+        .bar:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes soundWave {
+            0%, 100% { transform: scaleY(0.2); }
+            50% { transform: scaleY(1); }
+        }
+
+        .commands-hint {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .chip:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            color: var(--text-main);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* --- Google account connection widget ------------------------
+           Activates the existing OAuth backend (GET /api/v1/auth/google/
+           connect, /status, /disconnect - see app/api/v1/auth.py). This
+           is a status row + one same-window link/button, not a redesign
+           of the existing interface. */
+        .nova-google-status {
+            margin-top: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .nova-google-status-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Reuses .nova-icon-btn's look; <a> needs its own reset since
+           anchors don't inherit button styling. */
+        .nova-google-btn {
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--text-main);
+            border-radius: 100px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+
+        .nova-google-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+        }
+
+        .nova-google-btn.attention {
+            animation: pulseBadge 0.8s ease-in-out 2;
+        }
+
+        /* --- Phase 4: YouTube player + dynamic UI ------------------- */
+
+        .nova-panel {
+            width: 100%;
+            max-width: 520px;
+            margin-top: 1.25rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nova-panel.active {
+            display: flex;
+        }
+
+        .nova-player-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .nova-player-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+        }
+
+        .nova-player-frame iframe,
+        .nova-player-frame > div {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .nova-player-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            flex-wrap: wrap;
+        }
+
+        .nova-icon-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nova-icon-btn:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .nova-player-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        .nova-autoplay-notice {
+            display: none;
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            color: #fbbf24;
+            border-top: 1px solid var(--border);
+        }
+
+        .nova-autoplay-notice.active {
+            display: block;
+        }
+
+        .nova-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        /* --- Task 08: minimum internal Gmail workspace --------------- */
+        /* Same surface/border/blur treatment as `.nova-player-wrap`
+           above, applied to the Gmail panel itself since it has no
+           player frame of its own. */
+        .nova-gmail-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 14px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .nova-gmail-header {
+            padding-bottom: 8px;
+        }
+
+        .nova-gmail-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .nova-gmail-panel .nova-cards {
+            max-height: 420px;
+        }
+
+        .nova-gmail-empty {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding: 6px 2px;
+        }
+
+        /* --- Task 12: internal Gmail compose form --------------------
+           Shown inside the same Gmail workspace panel (never a new
+           window/tab) when a `gmail_draft` card's "Edit Draft" action
+           fires. Reuses the panel's existing surface - this is a form,
+           not a redesign of the workspace. */
+        .nova-gmail-composer {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .nova-gmail-composer.active {
+            display: flex;
+        }
+
+        .nova-gmail-composer input,
+        .nova-gmail-composer textarea {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .nova-gmail-composer textarea {
+            min-height: 90px;
+        }
+
+        .nova-gmail-composer-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .nova-gmail-composer-ccbcc-toggle {
+            align-self: flex-start;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .nova-gmail-composer-ccbcc-toggle:hover {
+            color: var(--text-main);
+        }
+
+        .nova-gmail-reply-context {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* --- Task 13: internal Gmail reading pane ---------------------
+           Shown inside the Gmail workspace panel when a `gmail_message`/
+           `gmail_thread` card's "Open" action fires - fetches the full
+           message/thread via the existing `/api/v1/gmail/...` GET routes
+           and renders it here instead of launching mail.google.com. */
+        .nova-gmail-reader {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .nova-gmail-reader.active {
+            display: flex;
+        }
+
+        .nova-gmail-reader-message {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+        }
+
+        .nova-gmail-reader-subject {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .nova-gmail-reader-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .nova-gmail-reader-body {
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        /* Task 07: sandboxed HTML-body preview (see `novaRenderGmailBody`
+           in the reader script) - plain fixed-height scrollable box, no
+           chrome/border tricks needed since the isolation guarantee comes
+           from the `sandbox` attribute, not from styling. */
+        .nova-gmail-reader-body-frame {
+            width: 100%;
+            min-height: 220px;
+            margin-top: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .nova-gmail-reader-attachments {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 2px 0 0 16px;
+            padding: 0;
+        }
+
+        .nova-gmail-reader-attachment-size {
+            opacity: 0.75;
+        }
+
+        .nova-gmail-attachment-download {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 6px;
+            padding: 1px 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .nova-gmail-attachment-download:hover {
+            color: var(--text-main);
+            border-color: var(--primary);
+        }
+
+        .nova-gmail-reader-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .nova-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 10px;
+            backdrop-filter: blur(15px);
+        }
+
+        .nova-card-thumb {
+            width: 84px;
+            height: 47px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .nova-card-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .nova-card-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nova-card-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nova-card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .nova-action-btn {
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--text-main);
+            border-radius: 100px;
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nova-action-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+        }
+
+        .nova-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--surface-solid);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 18px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+
+        .nova-toast.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mesh-gradient">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="badge">
+                <div class="dot"></div>
+                Neural Core Online
+            </div>
+            <h1>Nova Voice Agent</h1>
+            <p class="subtitle">Tap the microphone and speak your command naturally</p>
+        </div>
+
+        <div class="visualizer-container">
+            <div class="ring"></div>
+            <div class="ring ring-2"></div>
+            <button id="micBtn" class="mic-btn" title="Click to speak">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.39-.9.89 0 2.72-2.25 4.97-4.97 4.97s-4.97-2.25-4.97-4.97c0-.5-.41-.89-.9-.89s-.9.39-.9.89c0 3.19 2.45 5.82 5.56 6.22V21h2v-2.89c3.11-.4 5.56-3.03 5.56-6.22 0-.5-.4- .89-.89-.89z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="status-box">
+            <div id="statusText" class="status-text">Ready for input</div>
+            <div id="transcript" class="transcript">"Tap mic to initialize"</div>
+            <div id="waveBars" class="wave-bars">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </div>
+
+        <div class="commands-hint">
+            <div class="chip">"Open YouTube and play Karuppu song"</div>
+            <div class="chip">"Email john at gmail.com type hello"</div>
+            <div class="chip">"Open Gmail"</div>
+        </div>
+
+        <!-- Activates the existing Google OAuth backend (app/api/v1/auth.py):
+             a same-window link to GET /api/v1/auth/google/connect, a
+             status readout from GET /api/v1/auth/google/status, and a
+             disconnect button for POST /api/v1/auth/google/disconnect.
+             No new auth system, no window.open/target="_blank" - Google's
+             consent screen is reached via plain navigation
+             (window.location.href), same tab throughout. -->
+        <div class="nova-google-status" id="novaGoogleStatus">
+            <span class="nova-google-status-text" id="novaGoogleStatusText">Checking Google account…</span>
+            <a href="/api/v1/auth/google/connect" class="nova-google-btn" id="novaGoogleConnectBtn" style="display:none;">Connect Google Account</a>
+            <button type="button" class="nova-google-btn" id="novaGoogleDisconnectBtn" style="display:none;">Disconnect Google Account</button>
+        </div>
+    </div>
+
+    <!-- Phase 4: official YouTube IFrame Player + dynamic result cards.
+         Hidden until the agent returns a youtube_video / search result;
+         see NovaYouTubePlayer (static/js/youtube-player.js) and
+         NovaDynamicUI (static/js/dynamic-actions.js). -->
+    <div id="novaPanel" class="nova-panel">
+        <div class="nova-player-wrap">
+            <div class="nova-player-frame">
+                <div id="novaPlayerEl"></div>
+            </div>
+            <div class="nova-player-controls">
+                <button type="button" class="nova-icon-btn" id="novaPlayBtn">Play</button>
+                <button type="button" class="nova-icon-btn" id="novaPauseBtn">Pause</button>
+                <button type="button" class="nova-icon-btn" id="novaStopBtn">Stop</button>
+                <button type="button" class="nova-icon-btn" id="novaMuteBtn">Mute</button>
+                <button type="button" class="nova-icon-btn" id="novaSpeedBtn">1x</button>
+                <span class="nova-player-time" id="novaPlayerTime">0:00 / 0:00</span>
+            </div>
+            <div class="nova-autoplay-notice" id="novaAutoplayNotice">
+                Autoplay was blocked by your browser - tap Play above to start playback.
+            </div>
+        </div>
+        <div class="nova-cards" id="novaCards"></div>
+    </div>
+
+    <!-- Task 08: minimum internal Gmail workspace. Mirrors the YouTube
+         panel above (same `.nova-panel`/`active`-class pattern, same
+         `.nova-cards` card list) as its own persistent sibling panel -
+         Gmail state lives here and is never torn down when YouTube is
+         shown, and vice versa (Tasks 14/15), and neither requires a
+         browser tab (Task 07). Rendering is wired in the Gmail branch of
+         `sendAgentCommand` below; this is just the container. -->
+    <div id="novaGmailPanel" class="nova-panel nova-gmail-panel">
+        <div class="nova-gmail-header">
+            <span class="nova-gmail-title">Gmail</span>
+        </div>
+        <div class="nova-cards" id="novaGmailCards">
+            <div class="nova-gmail-empty" id="novaGmailEmpty">Ask me to check your inbox, search, or compose an email.</div>
+        </div>
+        <!-- Task 12: compose/edit form for an existing draft (opened via a
+             gmail_draft card's "Edit Draft" action). Save/Send/Delete post
+             straight to the existing `/api/v1/gmail/drafts/...` routes -
+             no window.open, no navigation, the result is re-rendered back
+             into `#novaGmailCards` above. -->
+        <div class="nova-gmail-composer" id="novaGmailComposer">
+            <input type="text" id="novaGmailComposerTo" placeholder="To (comma-separated addresses)">
+            <!-- Task 11: Cc/Bcc are collapsed behind a toggle, same pattern
+                 as Gmail's own compose window, since most emails use
+                 neither. Bcc is intentionally never pre-filled when
+                 editing an existing draft (see the comment on
+                 `openGmailComposer` below) - Gmail's API doesn't return
+                 it on read, only accepts it on write. -->
+            <button type="button" class="nova-gmail-composer-ccbcc-toggle" id="novaGmailComposerCcBccToggle">Cc/Bcc</button>
+            <input type="text" id="novaGmailComposerCc" placeholder="Cc (comma-separated addresses)" style="display: none;">
+            <input type="text" id="novaGmailComposerBcc" placeholder="Bcc (comma-separated addresses)" style="display: none;">
+            <input type="text" id="novaGmailComposerSubject" placeholder="Subject">
+            <textarea id="novaGmailComposerBody" placeholder="Write your email..."></textarea>
+            <div class="nova-gmail-composer-actions">
+                <button type="button" class="nova-icon-btn" id="novaGmailComposerSave">Save Draft</button>
+                <button type="button" class="nova-icon-btn" id="novaGmailComposerSend">Send</button>
+                <button type="button" class="nova-icon-btn" id="novaGmailComposerCancel">Cancel</button>
+            </div>
+        </div>
+        <!-- Task 13: reply/reply-all/forward composer variant. Separate
+             from the draft composer above because these three send
+             immediately through their own dedicated routes
+             (`/messages/<id>/reply|reply_all|forward`) rather than
+             operating on a draft_id - see `sendGmailConversationFlow`
+             below. Same panel/never-a-new-tab pattern as everything else
+             in this workspace. -->
+        <div class="nova-gmail-composer" id="novaGmailReplyComposer">
+            <div class="nova-gmail-reply-context" id="novaGmailReplyContext"></div>
+            <input type="text" id="novaGmailReplyTo" placeholder="To (comma-separated addresses)" style="display: none;">
+            <input type="text" id="novaGmailReplyExtraCc" placeholder="Add Cc (comma-separated addresses)" style="display: none;">
+            <textarea id="novaGmailReplyBody" placeholder="Write your reply..."></textarea>
+            <div class="nova-gmail-composer-actions">
+                <button type="button" class="nova-icon-btn" id="novaGmailReplySend">Send</button>
+                <button type="button" class="nova-icon-btn" id="novaGmailReplyCancel">Cancel</button>
+            </div>
+        </div>
+        <!-- Task 13: reading pane for a message/thread's "Open" action -
+             populated from `/api/v1/gmail/messages/<id>` or
+             `/api/v1/gmail/threads/<id>`, never mail.google.com. -->
+        <div class="nova-gmail-reader" id="novaGmailReader"></div>
+    </div>
+
+    <div class="nova-toast" id="novaToast"></div>
+
+    <!-- id must match `nova-yt-iframe-api` in youtube-player.js so it does
+         not insert a second, redundant copy of this script tag. -->
+    <script id="nova-yt-iframe-api" src="https://www.youtube.com/iframe_api"></script>
+    <script src="{{ url_for('static', filename='js/youtube-player.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dynamic-actions.js') }}"></script>
+    <script>
+        const micBtn = document.getElementById('micBtn');
+        const statusText = document.getElementById('statusText');
+        const transcript = document.getElementById('transcript');
+        const waveBars = document.getElementById('waveBars');
+
+        // --- Phase 4: player + dynamic UI wiring ------------------------
+
+        const novaPanel = document.getElementById('novaPanel');
+        const novaCardsEl = document.getElementById('novaCards');
+        const novaGmailPanel = document.getElementById('novaGmailPanel');
+        const novaGmailCardsEl = document.getElementById('novaGmailCards');
+        const novaGmailComposer = document.getElementById('novaGmailComposer');
+        const novaGmailComposerTo = document.getElementById('novaGmailComposerTo');
+        const novaGmailComposerCc = document.getElementById('novaGmailComposerCc');
+        const novaGmailComposerBcc = document.getElementById('novaGmailComposerBcc');
+        const novaGmailComposerCcBccToggle = document.getElementById('novaGmailComposerCcBccToggle');
+        const novaGmailComposerSubject = document.getElementById('novaGmailComposerSubject');
+        const novaGmailComposerBody = document.getElementById('novaGmailComposerBody');
+        const novaGmailReplyComposer = document.getElementById('novaGmailReplyComposer');
+        const novaGmailReplyContext = document.getElementById('novaGmailReplyContext');
+        const novaGmailReplyTo = document.getElementById('novaGmailReplyTo');
+        const novaGmailReplyExtraCc = document.getElementById('novaGmailReplyExtraCc');
+        const novaGmailReplyBody = document.getElementById('novaGmailReplyBody');
+        const novaGmailReader = document.getElementById('novaGmailReader');
+        const novaToastEl = document.getElementById('novaToast');
+        const novaAutoplayNotice = document.getElementById('novaAutoplayNotice');
+        const novaPlayerTime = document.getElementById('novaPlayerTime');
+        const novaGoogleStatusText = document.getElementById('novaGoogleStatusText');
+        const novaGoogleConnectBtn = document.getElementById('novaGoogleConnectBtn');
+        const novaGoogleDisconnectBtn = document.getElementById('novaGoogleDisconnectBtn');
+
+        function showToast(message) {
+            novaToastEl.textContent = message;
+            novaToastEl.classList.add('active');
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => novaToastEl.classList.remove('active'), 2200);
+        }
+
+        function fmtTime(seconds) {
+            seconds = Math.max(0, Math.floor(seconds || 0));
+            const m = Math.floor(seconds / 60);
+            const s = String(seconds % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // Shared "hit the API, tell the user what happened" helpers (Task 65:
+        // simplify frontend JS) - the playlist-management flows below each
+        // used to repeat the same fetch/parse/error-message/catch boilerplate.
+        async function novaApiCall(url, options) {
+            try {
+                const resp = await fetch(url, options);
+                const body = await resp.json().catch(() => ({}));
+                return { status: resp.status, body };
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function novaErrorMessage(body, fallback) {
+            return (body && body.error && body.error.message) || fallback;
+        }
+
+        // --- Google account connection widget ---------------------------
+        // Activates the existing OAuth backend - no new endpoints, no new
+        // auth system. Just: read GET /api/v1/auth/google/status to render
+        // connected/disconnected state, GET /api/v1/auth/google/connect
+        // (same-window navigation) to start the flow, and POST
+        // /api/v1/auth/google/disconnect to end it.
+        let novaGoogleConnected = false;
+
+        function updateGoogleStatusUI() {
+            if (novaGoogleConnected) {
+                novaGoogleStatusText.textContent = 'Google Account Connected';
+                novaGoogleConnectBtn.style.display = 'none';
+                novaGoogleDisconnectBtn.style.display = '';
+            } else {
+                novaGoogleStatusText.textContent = 'Google account not connected';
+                novaGoogleConnectBtn.style.display = '';
+                novaGoogleDisconnectBtn.style.display = 'none';
+            }
+        }
+
+        async function checkGoogleStatus() {
+            const result = await novaApiCall('/api/v1/auth/google/status');
+            if (!result || !result.body) {
+                novaGoogleStatusText.textContent = 'Google account status unavailable';
+                novaGoogleConnected = false;
+                novaGoogleConnectBtn.style.display = '';
+                novaGoogleDisconnectBtn.style.display = 'none';
+                return;
+            }
+            novaGoogleConnected = !!result.body.connected;
+            if (novaGoogleConnected && result.body.google_email) {
+                novaGoogleStatusText.textContent = `Google Account Connected (${result.body.google_email})`;
+                novaGoogleConnectBtn.style.display = 'none';
+                novaGoogleDisconnectBtn.style.display = '';
+            } else {
+                updateGoogleStatusUI();
+            }
+        }
+
+        // Draws attention to the Connect button instead of leaving the user
+        // at a dead end after a "connect your Google account first"-style
+        // message - re-checks status first in case a connect completed in
+        // another tab since the page loaded.
+        function flashGoogleConnectButton() {
+            checkGoogleStatus().then(() => {
+                if (novaGoogleConnectBtn.style.display === 'none') return;
+                novaGoogleConnectBtn.classList.add('attention');
+                novaGoogleConnectBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => novaGoogleConnectBtn.classList.remove('attention'), 1700);
+            });
+        }
+
+        function isGoogleConnectionMessage(message) {
+            return typeof message === 'string' && /connect/i.test(message) && /google|gmail/i.test(message);
+        }
+
+        // The link's plain `href` (GET /api/v1/auth/google/connect) already
+        // works as normal same-window navigation on its own - this handler
+        // only upgrades that with graceful handling of the "OAuth isn't
+        // configured yet" case (a plain link would otherwise land on a raw
+        // JSON error page). `?mode=json` is the same opt-in `/connect`
+        // already supports for callers that want the URL back instead of a
+        // redirect (see app/api/v1/auth.py) - not a second OAuth path.
+        novaGoogleConnectBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const result = await novaApiCall('/api/v1/auth/google/connect?mode=json');
+            if (!result) {
+                // No connectivity to the backend at all - fall back to the
+                // plain link so the browser's own error page (not ours)
+                // explains what happened, same as any dead link would.
+                window.location.href = novaGoogleConnectBtn.href;
+                return;
+            }
+            if (result.body && result.body.success && result.body.authorization_url) {
+                window.location.href = result.body.authorization_url; // same tab, same window
+                return;
+            }
+            showToast(novaErrorMessage(result.body, 'Google sign-in is not available right now.'));
+        });
+
+        novaGoogleDisconnectBtn.addEventListener('click', async () => {
+            const result = await novaApiCall('/api/v1/auth/google/disconnect', { method: 'POST' });
+            if (!result) {
+                showToast('Connection error disconnecting Google account.');
+                return;
+            }
+            showToast('Google account disconnected.');
+            await checkGoogleStatus();
+        });
+
+        // Google's own redirect lands the browser back on `/` with one of
+        // these flags after the OAuth round trip (see the `/google/callback`
+        // route) - same tab throughout, no popup, no external Gmail tab.
+        (function handleGoogleCallbackReturn() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('google') === 'connected') {
+                showToast('Google account connected.');
+            } else if (params.get('google') === 'error') {
+                showToast(params.get('reason') || 'Could not connect your Google account.');
+            }
+            if (params.has('google')) {
+                params.delete('google');
+                params.delete('reason');
+                const qs = params.toString();
+                history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''));
+            }
+        })();
+
+        checkGoogleStatus();
+
+        const novaPlayer = new NovaYouTubePlayer({
+            elementId: 'novaPlayerEl',
+            onStateChange: (name) => {
+                if (name === 'PLAYING') novaAutoplayNotice.classList.remove('active');
+            },
+            onError: (name) => showToast(`Playback error: ${name}`),
+            onAutoplayBlocked: () => novaAutoplayNotice.classList.add('active'),
+        });
+
+        // Lightweight current-time/duration readout; a full seek bar is a
+        // frontend-polish item for Phase 14, not required for Phase 4.
+        setInterval(async () => {
+            if (!novaPanel.classList.contains('active')) return;
+            try {
+                const [cur, dur] = await Promise.all([novaPlayer.getCurrentTime(), novaPlayer.getDuration()]);
+                novaPlayerTime.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+            } catch (e) { /* player not ready yet */ }
+        }, 1000);
+
+        document.getElementById('novaPlayBtn').addEventListener('click', () => novaPlayer.play());
+        document.getElementById('novaPauseBtn').addEventListener('click', () => novaPlayer.pause());
+        document.getElementById('novaStopBtn').addEventListener('click', () => novaPlayer.stop());
+
+        const muteBtn = document.getElementById('novaMuteBtn');
+        muteBtn.addEventListener('click', async () => {
+            const muted = await novaPlayer.isMuted();
+            if (muted) { await novaPlayer.unmute(); muteBtn.textContent = 'Mute'; }
+            else { await novaPlayer.mute(); muteBtn.textContent = 'Unmute'; }
+        });
+
+        const SPEEDS = [1, 1.25, 1.5, 2, 0.5, 0.75];
+        let speedIdx = 0;
+        document.getElementById('novaSpeedBtn').addEventListener('click', async (e) => {
+            speedIdx = (speedIdx + 1) % SPEEDS.length;
+            const rate = SPEEDS[speedIdx];
+            await novaPlayer.setPlaybackRate(rate);
+            e.target.textContent = `${rate}x`;
+        });
+
+        // Shared by both dynamic-UI instances below (Task 08) so a card's
+        // actions behave identically whichever panel rendered it - the
+        // switch itself doesn't change, only which container the card
+        // came from.
+        function handleCardAction(actionId, card) {
+            const video = card.data || {};
+            switch (actionId) {
+                case 'play':
+                    novaPanel.classList.add('active');
+                    novaPlayer.loadVideo(video.video_id, { autoplay: true });
+                    break;
+                case 'open':
+                    // Task 04 (Gmail same-tab): this actionId is shared by
+                    // YouTube's "Open on YouTube" and Gmail's "Open" card
+                    // actions (see GMAIL_MESSAGE_ACTIONS /
+                    // GMAIL_THREAD_ACTIONS in app/services/dynamic_ui.py).
+                    // Gmail must never deliberately open another browser
+                    // tab; YouTube's behavior below is unchanged.
+                    //
+                    // Task 13: rather than a no-op, Gmail's "Open" now
+                    // actually opens the message/thread - inside Nova's
+                    // own reading pane via the internal Gmail API routes.
+                    if (card.type === 'gmail_message') {
+                        openGmailMessageReader((card.data || {}).message_id);
+                        break;
+                    }
+                    if (card.type === 'gmail_thread') {
+                        openGmailThreadReader((card.data || {}).thread_id);
+                        break;
+                    }
+                    if (String(card.type || '').startsWith('gmail')) {
+                        break;
+                    }
+                    window.open(video.url || `https://www.youtube.com/watch?v=${video.video_id}`, '_blank');
+                    break;
+                case 'queue':
+                    novaPlayer.enqueue(video.video_id, video);
+                    showToast(`Queued "${video.title}"`);
+                    break;
+                case 'add_to_playlist':
+                    addVideoToPlaylistFlow(video);
+                    break;
+                case 'delete_playlist':
+                    deletePlaylistFlow(card.data || {});
+                    break;
+                case 'remove_from_playlist':
+                    removePlaylistItemFlow(card.data || {});
+                    break;
+                case 'share':
+                    const shareUrl = video.url || `https://www.youtube.com/watch?v=${video.video_id}`;
+                    if (navigator.share) {
+                        navigator.share({ title: video.title, url: shareUrl }).catch(() => {});
+                    } else if (navigator.clipboard) {
+                        navigator.clipboard.writeText(shareUrl);
+                        showToast('Link copied to clipboard');
+                    }
+                    break;
+                // Task 08/09: the simple, no-extra-input Gmail message
+                // actions (see GMAIL_MESSAGE_ACTIONS in
+                // app/services/dynamic_ui.py) - each just POSTs to the
+                // matching existing `/api/v1/gmail/messages/<id>/...`
+                // route and refreshes this one card in place via
+                // `gmailUI.updateCard()` rather than reloading whatever
+                // list is currently shown.
+                case 'mark_read':
+                    if (card.type === 'gmail_message') gmailMessageActionFlow(card, 'mark_read', 'Marked as read.');
+                    else showToast(`Unhandled action: ${actionId}`);
+                    break;
+                case 'mark_unread':
+                    if (card.type === 'gmail_message') gmailMessageActionFlow(card, 'mark_unread', 'Marked as unread.');
+                    else showToast(`Unhandled action: ${actionId}`);
+                    break;
+                case 'star':
+                    if (card.type === 'gmail_message') gmailMessageActionFlow(card, 'star', 'Starred.');
+                    else showToast(`Unhandled action: ${actionId}`);
+                    break;
+                case 'unstar':
+                    if (card.type === 'gmail_message') gmailMessageActionFlow(card, 'unstar', 'Unstarred.');
+                    else showToast(`Unhandled action: ${actionId}`);
+                    break;
+                case 'archive':
+                    if (card.type === 'gmail_message') gmailMessageActionFlow(card, 'archive', 'Archived.');
+                    else showToast(`Unhandled action: ${actionId}`);
+                    break;
+                case 'trash':
+                    if (card.type === 'gmail_message') gmailMessageActionFlow(card, 'trash', 'Moved to Trash.');
+                    else showToast(`Unhandled action: ${actionId}`);
+                    break;
+                // Task 13: Reply/Reply All/Forward. `gmail_message` cards
+                // (from a list or the reader) always carry their own
+                // `message_id`, so these open the reply composer directly.
+                // `gmail_thread` list cards (ThreadSummary) don't carry any
+                // per-message id - only a thread_id/snippet/count - so
+                // "reply" there means "reply to the thread's most recent
+                // message", resolved by fetching the thread first via the
+                // same route the reader already uses.
+                case 'reply':
+                case 'reply_all':
+                case 'forward':
+                    if (card.type === 'gmail_message') {
+                        openGmailReplyComposer(actionId, card.data || {});
+                    } else if (card.type === 'gmail_thread' && actionId === 'reply') {
+                        replyToLatestInThreadFlow((card.data || {}).thread_id);
+                    } else {
+                        showToast(`Unhandled action: ${actionId}`);
+                    }
+                    break;
+                // Task 12: the three `GMAIL_DRAFT_ACTIONS` (see
+                // app/services/dynamic_ui.py) - all operate on the same
+                // internal compose form/panel, never mail.google.com.
+                case 'edit':
+                    if (card.type === 'gmail_draft') openGmailComposer(card.data || {});
+                    else showToast(`Unhandled action: ${actionId}`);
+                    break;
+                case 'send':
+                    if (card.type === 'gmail_draft') sendGmailDraftFlow((card.data || {}).draft_id);
+                    else showToast(`Unhandled action: ${actionId}`);
+                    break;
+                case 'delete_draft':
+                    if (card.type === 'gmail_draft') deleteGmailDraftFlow((card.data || {}).draft_id);
+                    else showToast(`Unhandled action: ${actionId}`);
+                    break;
+                default:
+                    showToast(`Unhandled action: ${actionId}`);
+            }
+        }
+
+        // Task 12: internal Gmail compose form - opened by a `gmail_draft`
+        // card's "Edit Draft" action (or after a "write an email"/"draft
+        // an email to..." command lands a new draft in the workspace).
+        // Save/Send/Delete all call the existing `/api/v1/gmail/drafts/...`
+        // REST routes directly (the same ones the draft-card actions and
+        // Phase 7's API already use) - no new backend, no window.open, no
+        // navigation. The result re-renders as the same `gmail_draft` card
+        // back in `#novaGmailCards`.
+        let novaGmailComposerDraftId = null;
+
+        function openGmailComposer(draft) {
+            const message = draft.message || {};
+            novaGmailComposerDraftId = draft.draft_id || null;
+            novaGmailComposerTo.value = message.to || '';
+            novaGmailComposerSubject.value = message.subject || '';
+            novaGmailComposerBody.value = message.body_text || '';
+            // Cc round-trips fine (Gmail returns it as a normal header).
+            // Bcc never does - the Gmail API only accepts Bcc on write and
+            // never echoes it back on read, for anyone but the account
+            // that sent it - so re-opening an existing draft always shows
+            // an empty Bcc field even if one was set previously. That's a
+            // Gmail API limitation, not a Nova bug.
+            novaGmailComposerCc.value = message.cc || '';
+            novaGmailComposerBcc.value = '';
+            const hasCcBcc = Boolean(message.cc);
+            novaGmailComposerCc.style.display = hasCcBcc ? '' : 'none';
+            novaGmailComposerBcc.style.display = hasCcBcc ? '' : 'none';
+            novaGmailPanel.classList.add('active');
+            closeGmailReader();
+            closeGmailReplyComposer();
+            novaGmailComposer.classList.add('active');
+        }
+
+        function closeGmailComposer() {
+            novaGmailComposerDraftId = null;
+            novaGmailComposer.classList.remove('active');
+            novaGmailComposerCc.style.display = 'none';
+            novaGmailComposerBcc.style.display = 'none';
+        }
+
+        novaGmailComposerCcBccToggle.addEventListener('click', () => {
+            const showing = novaGmailComposerCc.style.display !== 'none';
+            novaGmailComposerCc.style.display = showing ? 'none' : '';
+            novaGmailComposerBcc.style.display = showing ? 'none' : '';
+        });
+
+        function parseGmailComposerAddresses(inputEl) {
+            return inputEl.value
+                .split(',')
+                .map((addr) => addr.trim())
+                .filter(Boolean);
+        }
+
+        function parseGmailComposerRecipients() {
+            return parseGmailComposerAddresses(novaGmailComposerTo);
+        }
+
+        async function saveGmailDraftFlow() {
+            if (!novaGmailComposerDraftId) {
+                showToast('Nothing to save.');
+                return;
+            }
+            const to = parseGmailComposerRecipients();
+            if (!to.length) {
+                showToast('Add at least one recipient.');
+                return;
+            }
+            const cc = parseGmailComposerAddresses(novaGmailComposerCc);
+            const bcc = parseGmailComposerAddresses(novaGmailComposerBcc);
+            const result = await novaApiCall(`/api/v1/gmail/drafts/${encodeURIComponent(novaGmailComposerDraftId)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to,
+                    cc,
+                    bcc,
+                    subject: novaGmailComposerSubject.value,
+                    body_text: novaGmailComposerBody.value,
+                }),
+            });
+            if (!result) {
+                showToast('Connection error saving draft.');
+                return;
+            }
+            if (result.status === 401) {
+                showToast('Connect your Google account first to save drafts.');
+                flashGoogleConnectButton();
+                return;
+            }
+            if (!result.body.success) {
+                showToast(novaErrorMessage(result.body, 'Could not save draft.'));
+                return;
+            }
+            showToast('Draft saved.');
+            if (result.body.card) gmailUI.renderSingleCard(result.body.card);
+            closeGmailComposer();
+        }
+
+        async function sendGmailDraftFlow(draftId) {
+            const id = draftId || novaGmailComposerDraftId;
+            if (!id) {
+                showToast('Nothing to send.');
+                return;
+            }
+            const result = await novaApiCall(`/api/v1/gmail/drafts/${encodeURIComponent(id)}/send`, { method: 'POST' });
+            if (!result) {
+                showToast('Connection error sending email.');
+                return;
+            }
+            if (result.status === 401) {
+                showToast('Connect your Google account first to send email.');
+                flashGoogleConnectButton();
+                return;
+            }
+            if (!result.body.success) {
+                showToast(novaErrorMessage(result.body, 'Could not send email.'));
+                return;
+            }
+            showToast('Email sent.');
+            if (result.body.card) gmailUI.renderSingleCard(result.body.card);
+            closeGmailComposer();
+        }
+
+        // Task 08/09: shared handler behind the simple Gmail message-card
+        // actions (mark read/unread, star/unstar, archive, trash) - each
+        // just differs by which existing `/api/v1/gmail/messages/<id>/...`
+        // route it POSTs to and what toast it shows on success. Every one
+        // of these routes already returns the message's updated `card` in
+        // its response body (see `_message_action_response` in
+        // app/api/v1/gmail.py), which is used to refresh just this one
+        // card via `gmailUI.updateCard()` instead of reloading whatever
+        // list is currently displayed.
+        async function gmailMessageActionFlow(card, endpoint, successMessage) {
+            const messageId = (card.data || {}).message_id;
+            if (!messageId) {
+                showToast('Missing message id.');
+                return;
+            }
+            const result = await novaApiCall(`/api/v1/gmail/messages/${encodeURIComponent(messageId)}/${endpoint}`, {
+                method: 'POST',
+            });
+            if (!result) {
+                showToast('Connection error completing that action.');
+                return;
+            }
+            if (result.status === 401) {
+                showToast('Connect your Google account first to manage email.');
+                flashGoogleConnectButton();
+                return;
+            }
+            if (!result.body.success) {
+                showToast(novaErrorMessage(result.body, 'Could not complete that action.'));
+                return;
+            }
+            showToast(successMessage);
+            if (result.body.card) gmailUI.updateCard(result.body.card);
+        }
+
+        async function deleteGmailDraftFlow(draftId) {
+            const id = draftId || novaGmailComposerDraftId;
+            if (!id) {
+                showToast('Nothing to delete.');
+                return;
+            }
+            const result = await novaApiCall(`/api/v1/gmail/drafts/${encodeURIComponent(id)}`, { method: 'DELETE' });
+            if (!result) {
+                showToast('Connection error deleting draft.');
+                return;
+            }
+            if (result.status === 401) {
+                showToast('Connect your Google account first to manage drafts.');
+                flashGoogleConnectButton();
+                return;
+            }
+            if (!result.body.success) {
+                showToast(novaErrorMessage(result.body, 'Could not delete draft.'));
+                return;
+            }
+            showToast('Draft deleted.');
+            gmailUI.renderSingleCard(null);
+            closeGmailComposer();
+        }
+
+        document.getElementById('novaGmailComposerSave').addEventListener('click', saveGmailDraftFlow);
+        document.getElementById('novaGmailComposerSend').addEventListener('click', () => {
+            // Mirrors `NovaDynamicUI`'s own `requires_confirmation` gate on
+            // the draft card's "Send" action (see GMAIL_DRAFT_ACTIONS) -
+            // this button bypasses that card/action machinery, so it needs
+            // its own confirmation before actually sending anything.
+            if (window.confirm('Send this email?')) sendGmailDraftFlow(novaGmailComposerDraftId);
+        });
+        document.getElementById('novaGmailComposerCancel').addEventListener('click', closeGmailComposer);
+
+        // Task 13: Reply/Reply All/Forward composer. Unlike the draft
+        // composer above, these three send immediately (no draft_id -
+        // straight through `/messages/<id>/reply|reply_all|forward`), so
+        // there's no separate "Save"/"Send" split, just one Send button
+        // gated by its own `window.confirm`, same pattern as the draft
+        // composer's Send button uses.
+        let novaGmailReplyMode = null; // 'reply' | 'reply_all' | 'forward'
+        let novaGmailReplyMessageId = null;
+
+        function openGmailReplyComposer(mode, message) {
+            const messageId = message.message_id;
+            if (!messageId) {
+                showToast('Missing message id.');
+                return;
+            }
+            novaGmailReplyMode = mode;
+            novaGmailReplyMessageId = messageId;
+            novaGmailReplyBody.value = '';
+            novaGmailReplyTo.value = '';
+            novaGmailReplyExtraCc.value = '';
+            const subject = message.subject || '(no subject)';
+            if (mode === 'forward') {
+                novaGmailReplyContext.textContent = `Forward - Subject: ${subject}`;
+                novaGmailReplyTo.style.display = '';
+                novaGmailReplyExtraCc.style.display = 'none';
+            } else if (mode === 'reply_all') {
+                // Best-effort preview of who this actually goes to - the
+                // server (`gmail.reply_all`) computes the real recipient
+                // list itself from the original message's headers, this is
+                // just so the user isn't sending blind.
+                const recipients = [message.from, message.to].filter(Boolean).join(', ');
+                novaGmailReplyContext.textContent = `Reply All to: ${recipients || '(unknown recipients)'} - Re: ${subject}`;
+                novaGmailReplyTo.style.display = 'none';
+                novaGmailReplyExtraCc.style.display = '';
+            } else {
+                novaGmailReplyContext.textContent = `Reply to: ${message.from || '(unknown sender)'} - Re: ${subject}`;
+                novaGmailReplyTo.style.display = 'none';
+                novaGmailReplyExtraCc.style.display = 'none';
+            }
+            novaGmailPanel.classList.add('active');
+            closeGmailComposer();
+            closeGmailReader();
+            novaGmailReplyComposer.classList.add('active');
+        }
+
+        function closeGmailReplyComposer() {
+            novaGmailReplyMode = null;
+            novaGmailReplyMessageId = null;
+            novaGmailReplyComposer.classList.remove('active');
+        }
+
+        // "Reply" on a `gmail_thread` LIST card (see ThreadSummary/
+        // GMAIL_THREAD_ACTIONS) has no message_id to work with - a thread
+        // summary is just `{thread_id, snippet, message_count}`. Resolve
+        // it the way Gmail's own UI does: reply to the thread's most
+        // recent message, fetched via the same read route the "Open"
+        // action already uses.
+        async function replyToLatestInThreadFlow(threadId) {
+            if (!threadId) {
+                showToast('Missing thread id.');
+                return;
+            }
+            const result = await novaApiCall(`/api/v1/gmail/threads/${encodeURIComponent(threadId)}`);
+            if (!result) {
+                showToast('Connection error opening thread.');
+                return;
+            }
+            if (result.status === 401) {
+                showToast('Connect your Google account first to read email.');
+                flashGoogleConnectButton();
+                return;
+            }
+            if (!result.body.success || !result.body.thread) {
+                showToast(novaErrorMessage(result.body, 'Could not open that conversation.'));
+                return;
+            }
+            const messages = result.body.thread.messages || [];
+            if (!messages.length) {
+                showToast('This conversation has no messages to reply to.');
+                return;
+            }
+            openGmailReplyComposer('reply', messages[messages.length - 1]);
+        }
+
+        async function sendGmailConversationFlow() {
+            const mode = novaGmailReplyMode;
+            const messageId = novaGmailReplyMessageId;
+            if (!mode || !messageId) {
+                showToast('Nothing to send.');
+                return;
+            }
+            const bodyText = novaGmailReplyBody.value.trim();
+            let endpoint;
+            let payload;
+            let confirmMessage;
+            if (mode === 'forward') {
+                const to = parseGmailComposerAddresses(novaGmailReplyTo);
+                if (!to.length) {
+                    showToast('Add at least one recipient to forward to.');
+                    return;
+                }
+                endpoint = `/api/v1/gmail/messages/${encodeURIComponent(messageId)}/forward`;
+                payload = { to, body_text: bodyText };
+                confirmMessage = `Forward this email to ${to.join(', ')}?`;
+            } else {
+                if (!bodyText) {
+                    showToast('Write a reply first.');
+                    return;
+                }
+                if (mode === 'reply_all') {
+                    endpoint = `/api/v1/gmail/messages/${encodeURIComponent(messageId)}/reply_all`;
+                    payload = { body_text: bodyText, extra_cc: novaGmailReplyExtraCc.value.trim() };
+                    confirmMessage = 'Send this reply to everyone on the thread?';
+                } else {
+                    endpoint = `/api/v1/gmail/messages/${encodeURIComponent(messageId)}/reply`;
+                    payload = { body_text: bodyText };
+                    confirmMessage = 'Send this reply?';
+                }
+            }
+            if (!window.confirm(confirmMessage)) return;
+            const result = await novaApiCall(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!result) {
+                showToast('Connection error sending email.');
+                return;
+            }
+            if (result.status === 401) {
+                showToast('Connect your Google account first to send email.');
+                flashGoogleConnectButton();
+                return;
+            }
+            if (!result.body.success) {
+                showToast(novaErrorMessage(result.body, 'Could not send email.'));
+                return;
+            }
+            showToast(mode === 'forward' ? 'Email forwarded.' : 'Reply sent.');
+            closeGmailReplyComposer();
+        }
+
+        document.getElementById('novaGmailReplySend').addEventListener('click', sendGmailConversationFlow);
+        document.getElementById('novaGmailReplyCancel').addEventListener('click', closeGmailReplyComposer);
+
+        // Task 13: internal reading pane for a `gmail_message`/
+        // `gmail_thread` card's "Open" action. Fetches the full
+        // message/thread via the existing read routes and renders it
+        // in-panel - never mail.google.com, never a new tab.
+        function novaEscapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str == null ? '' : String(str);
+            return div.innerHTML;
+        }
+
+        // Text-node serialization (what `novaEscapeHtml` relies on) escapes
+        // `&`/`<`/`>` but NOT quote characters - there is no need to when
+        // the result lands between tags. It matters the moment that same
+        // string is placed inside a `"..."`-delimited HTML *attribute*
+        // (see the `srcdoc` build-up below): an unescaped `"` in, say, an
+        // email's `<a href="...">` markup would otherwise close the
+        // attribute early and let the rest of the message body inject
+        // arbitrary markup/attributes into Nova's own page - before the
+        // sandboxed iframe below even comes into play. This wrapper closes
+        // that gap for any value used in attribute position.
+        function novaEscapeHtmlAttr(str) {
+            return novaEscapeHtml(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function novaFormatAttachmentSize(bytes) {
+            if (bytes === null || bytes === undefined) return '';
+            if (bytes < 1024) return `${bytes} B`;
+            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+            return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+        }
+
+        function novaRenderGmailAttachments(attachments, messageId) {
+            if (!attachments || !attachments.length) return '';
+            const items = attachments
+                .map((a) => {
+                    const name = novaEscapeHtml(a.filename || 'attachment');
+                    const size = novaFormatAttachmentSize(a.size);
+                    const nameAttr = novaEscapeHtmlAttr(a.filename || 'attachment');
+                    const mimeAttr = novaEscapeHtmlAttr(a.mime_type || 'application/octet-stream');
+                    const idAttr = novaEscapeHtmlAttr(a.attachment_id || '');
+                    const msgAttr = novaEscapeHtmlAttr(messageId || '');
+                    return `<li>${name}${size ? ` <span class="nova-gmail-reader-attachment-size">(${size})</span>` : ''} ` +
+                        `<button type="button" class="nova-gmail-attachment-download" ` +
+                        `data-message-id="${msgAttr}" data-attachment-id="${idAttr}" ` +
+                        `data-filename="${nameAttr}" data-mime-type="${mimeAttr}">Download</button></li>`;
+                })
+                .join('');
+            return `<div class="nova-gmail-reader-meta">Attachments:</div><ul class="nova-gmail-reader-attachments">${items}</ul>`;
+        }
+
+        // Task 14: attachment download. The API returns base64-encoded
+        // bytes (see `GmailApiClient.get_attachment`/`AttachmentData`) -
+        // this decodes them into a `Blob` and triggers a normal
+        // browser save via a throwaway `<a download>`, entirely
+        // client-side. No new tab, no navigation away from Nova.
+        // Task 14: sanitize an attacker-controlled attachment filename
+        // (any sender can set this) before it's used as `<a download>`'s
+        // suggested filename - strips path separators/traversal and
+        // control characters so it can't be used to write outside the
+        // browser's download directory or inject anything odd into the
+        // save dialog. Purely a filename hardening step: display strings
+        // elsewhere are separately protected by `novaEscapeHtml`.
+        function novaSafeFilename(name) {
+            const base = String(name || 'attachment')
+                .replace(/[\/\\]/g, '_')
+                .replace(/\.\./g, '_')
+                // eslint-disable-next-line no-control-regex
+                .replace(/[\x00-\x1f\x7f]/g, '')
+                .trim();
+            return base.slice(0, 255) || 'attachment';
+        }
+
+        async function downloadGmailAttachmentFlow(messageId, attachmentId, filename, mimeType) {
+            if (!messageId || !attachmentId) {
+                showToast('Missing attachment reference.');
+                return;
+            }
+            const result = await novaApiCall(
+                `/api/v1/gmail/messages/${encodeURIComponent(messageId)}/attachments/${encodeURIComponent(attachmentId)}`
+            );
+            if (!result) {
+                showToast('Connection error downloading attachment.');
+                return;
+            }
+            if (result.status === 401) {
+                showToast('Connect your Google account first to download attachments.');
+                flashGoogleConnectButton();
+                return;
+            }
+            if (!result.body.success || !result.body.attachment || !result.body.attachment.data_base64) {
+                showToast(novaErrorMessage(result.body, 'Could not download that attachment.'));
+                return;
+            }
+            let bytes;
+            try {
+                const binary = atob(result.body.attachment.data_base64);
+                bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            } catch (err) {
+                showToast('Could not decode that attachment.');
+                return;
+            }
+            const blob = new Blob([bytes], { type: mimeType || 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = novaSafeFilename(filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        // Delegated listener (not one per button) since a thread reader can
+        // render many messages, each with its own attachments, all sharing
+        // this one class.
+        novaGmailReader.addEventListener('click', (event) => {
+            const btn = event.target.closest('.nova-gmail-attachment-download');
+            if (!btn) return;
+            downloadGmailAttachmentFlow(
+                btn.dataset.messageId,
+                btn.dataset.attachmentId,
+                btn.dataset.filename,
+                btn.dataset.mimeType
+            );
+        });
+
+        // Task 07 fix: the reader used to only ever show `body_text`,
+        // silently falling back to "(no content)" for any message whose
+        // only body part is HTML (common for newsletters/marketing mail
+        // with no text/plain alternative) even though `body_html` was
+        // already present in the API response. Rendering it via
+        // `innerHTML` would execute any embedded `<script>`/`onerror=`/
+        // `javascript:` handler against Nova's own origin - exactly the
+        // injection class master spec section 15 SECURITY warns about
+        // for "safely render email HTML", since a message's HTML body is
+        // fully attacker-controlled (anyone who emails the connected
+        // account). Instead this uses a `<iframe sandbox="">` `srcdoc`:
+        // with no `allow-*` tokens, the sandboxed document cannot run
+        // scripts, cannot reach Nova's DOM/cookies/session (no
+        // `allow-same-origin`), and cannot navigate the top frame or pop
+        // a new tab from a clicked link (no `allow-top-navigation`/
+        // `allow-popups`) - so even a hostile message body only ever
+        // renders inertly inside its own box. Known, accepted limitation:
+        // remote images referenced in the HTML are still requested
+        // directly by the browser (no proxying) - a tracking-pixel privacy
+        // tradeoff, not a code-execution one. Plain-text-only messages
+        // keep using the existing escaped-text path unchanged.
+        function novaRenderGmailBody(message) {
+            if (message.body_html) {
+                const srcdoc =
+                    '<meta charset="utf-8"><style>body{font-family:inherit;margin:0;padding:8px;word-wrap:break-word;}' +
+                    'img{max-width:100%;}</style>' +
+                    message.body_html;
+                return `<iframe class="nova-gmail-reader-body-frame" sandbox="" srcdoc="${novaEscapeHtmlAttr(srcdoc)}"></iframe>`;
+            }
+            return `<div class="nova-gmail-reader-body">${novaEscapeHtml(message.body_text || '(no content)')}</div>`;
+        }
+
+        function renderGmailReaderMessage(message) {
+            return `
+                <div class="nova-gmail-reader-message">
+                    <div class="nova-gmail-reader-subject">${novaEscapeHtml(message.subject || '(no subject)')}</div>
+                    <div class="nova-gmail-reader-meta">From: ${novaEscapeHtml(message.from || '')}</div>
+                    <div class="nova-gmail-reader-meta">To: ${novaEscapeHtml(message.to || '')}</div>
+                    <div class="nova-gmail-reader-meta">Date: ${novaEscapeHtml(message.date || '')}</div>
+                    ${novaRenderGmailAttachments(message.attachments, message.message_id)}
+                    ${novaRenderGmailBody(message)}
+                </div>
+            `;
+        }
+
+        function closeGmailReader() {
+            novaGmailReader.classList.remove('active');
+            novaGmailReader.innerHTML = '';
+        }
+
+        async function openGmailMessageReader(messageId) {
+            if (!messageId) {
+                showToast('Missing message id.');
+                return;
+            }
+            novaGmailPanel.classList.add('active');
+            closeGmailComposer();
+            closeGmailReplyComposer();
+            const result = await novaApiCall(`/api/v1/gmail/messages/${encodeURIComponent(messageId)}`);
+            if (!result) {
+                showToast('Connection error opening message.');
+                return;
+            }
+            if (result.status === 401) {
+                showToast('Connect your Google account first to read email.');
+                flashGoogleConnectButton();
+                return;
+            }
+            if (!result.body.success || !result.body.message) {
+                showToast(novaErrorMessage(result.body, 'Could not open that email.'));
+                return;
+            }
+            const message = result.body.message;
+            novaGmailReader.innerHTML =
+                renderGmailReaderMessage(message) +
+                '<div class="nova-gmail-reader-actions">' +
+                '<button type="button" class="nova-icon-btn" id="novaGmailReaderReply">Reply</button>' +
+                '<button type="button" class="nova-icon-btn" id="novaGmailReaderReplyAll">Reply All</button>' +
+                '<button type="button" class="nova-icon-btn" id="novaGmailReaderForward">Forward</button>' +
+                '<button type="button" class="nova-icon-btn" id="novaGmailReaderClose">Close</button></div>';
+            novaGmailReader.classList.add('active');
+            document.getElementById('novaGmailReaderClose').addEventListener('click', closeGmailReader);
+            document.getElementById('novaGmailReaderReply').addEventListener('click', () => openGmailReplyComposer('reply', message));
+            document.getElementById('novaGmailReaderReplyAll').addEventListener('click', () => openGmailReplyComposer('reply_all', message));
+            document.getElementById('novaGmailReaderForward').addEventListener('click', () => openGmailReplyComposer('forward', message));
+        }
+
+        async function openGmailThreadReader(threadId) {
+            if (!threadId) {
+                showToast('Missing thread id.');
+                return;
+            }
+            novaGmailPanel.classList.add('active');
+            closeGmailComposer();
+            closeGmailReplyComposer();
+            const result = await novaApiCall(`/api/v1/gmail/threads/${encodeURIComponent(threadId)}`);
+            if (!result) {
+                showToast('Connection error opening thread.');
+                return;
+            }
+            if (result.status === 401) {
+                showToast('Connect your Google account first to read email.');
+                flashGoogleConnectButton();
+                return;
+            }
+            if (!result.body.success || !result.body.thread) {
+                showToast(novaErrorMessage(result.body, 'Could not open that conversation.'));
+                return;
+            }
+            const messages = result.body.thread.messages || [];
+            const lastMessage = messages[messages.length - 1] || {};
+            novaGmailReader.innerHTML =
+                messages.map(renderGmailReaderMessage).join('') +
+                '<div class="nova-gmail-reader-actions">' +
+                '<button type="button" class="nova-icon-btn" id="novaGmailReaderReply">Reply</button>' +
+                '<button type="button" class="nova-icon-btn" id="novaGmailReaderReplyAll">Reply All</button>' +
+                '<button type="button" class="nova-icon-btn" id="novaGmailReaderForward">Forward</button>' +
+                '<button type="button" class="nova-icon-btn" id="novaGmailReaderClose">Close</button></div>';
+            novaGmailReader.classList.add('active');
+            document.getElementById('novaGmailReaderClose').addEventListener('click', closeGmailReader);
+            // Reply/Reply All/Forward act on the thread's most recent
+            // message, same as opening them from a `gmail_message` card
+            // for that message would.
+            document.getElementById('novaGmailReaderReply').addEventListener('click', () => openGmailReplyComposer('reply', lastMessage));
+            document.getElementById('novaGmailReaderReplyAll').addEventListener('click', () => openGmailReplyComposer('reply_all', lastMessage));
+            document.getElementById('novaGmailReaderForward').addEventListener('click', () => openGmailReplyComposer('forward', lastMessage));
+        }
+
+        // "Open Gmail" with an already-connected account: load the inbox
+        // straight into the existing workspace via the existing read route
+        // (no new backend, no new UI - just calling
+        // GET /api/v1/gmail/messages the same way a "check my inbox"
+        // command already does).
+        async function loadGmailInboxIntoWorkspace() {
+            const result = await novaApiCall('/api/v1/gmail/messages?max_results=10');
+            if (!result || !result.body) {
+                showToast('Connection error loading your inbox.');
+                return;
+            }
+            if (result.status === 401) {
+                flashGoogleConnectButton();
+                return;
+            }
+            if (result.body.success && Array.isArray(result.body.cards)) {
+                gmailUI.renderCards(result.body.cards);
+            }
+        }
+
+        const dynamicUI = new NovaDynamicUI({
+            container: novaCardsEl,
+            onAction: handleCardAction,
+        });
+
+        // Task 08: second `NovaDynamicUI` instance bound to the Gmail
+        // workspace's own card container, reusing the exact same renderer
+        // classes (`gmail_message`/`gmail_thread`/`gmail_draft` in
+        // dynamic-actions.js) and the same action handler above - only the
+        // target container differs, matching the YouTube instance's setup.
+        const gmailUI = new NovaDynamicUI({
+            container: novaGmailCardsEl,
+            onAction: handleCardAction,
+        });
+
+        // Phase 5: minimal "add to playlist" flow. A real playlist-picker
+        // component (with thumbnails, search, inline "new playlist") is
+        // Phase 14 (Advanced Dynamic Frontend) territory - this is just
+        // enough to actually call the youtube.playlist.* tools added this
+        // phase instead of leaving the action a dead stub.
+        async function addVideoToPlaylistFlow(video) {
+            const listResult = await novaApiCall('/api/v1/youtube/playlists');
+            if (!listResult) {
+                showToast('Connection error loading playlists.');
+                return;
+            }
+            if (listResult.status === 401) {
+                showToast('Connect your Google account first to manage playlists.');
+                return;
+            }
+            if (!listResult.body.success) {
+                showToast(novaErrorMessage(listResult.body, 'Could not load playlists.'));
+                return;
+            }
+            const playlists = listResult.body.playlists || [];
+
+            let targetPlaylistId;
+            if (playlists.length === 0) {
+                const title = window.prompt('No playlists yet. Name a new one:', 'My Playlist');
+                if (!title) return;
+                targetPlaylistId = await createPlaylistFlow(title);
+                if (!targetPlaylistId) return;
+            } else {
+                const listText = playlists.map((p, i) => `${i + 1}. ${p.title}`).join('\n');
+                const choice = window.prompt(
+                    `Add "${video.title}" to which playlist? Enter a number, or 0 for a new playlist:\n${listText}`,
+                    '1'
+                );
+                if (choice === null) return;
+                const idx = parseInt(choice, 10);
+                if (idx === 0) {
+                    const title = window.prompt('New playlist name:', 'My Playlist');
+                    if (!title) return;
+                    targetPlaylistId = await createPlaylistFlow(title);
+                    if (!targetPlaylistId) return;
+                } else if (Number.isInteger(idx) && idx >= 1 && idx <= playlists.length) {
+                    targetPlaylistId = playlists[idx - 1].playlist_id;
+                } else {
+                    showToast('Not a valid choice.');
+                    return;
+                }
+            }
+
+            const addResult = await novaApiCall(`/api/v1/youtube/playlists/${encodeURIComponent(targetPlaylistId)}/items`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ video_id: video.video_id }),
+            });
+            if (!addResult) {
+                showToast('Connection error adding to playlist.');
+                return;
+            }
+            showToast(addResult.body.success ? `Added "${video.title}" to playlist` : novaErrorMessage(addResult.body, 'Could not add video.'));
+        }
+
+        async function createPlaylistFlow(title) {
+            const result = await novaApiCall('/api/v1/youtube/playlists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title }),
+            });
+            if (!result) {
+                showToast('Connection error creating playlist.');
+                return null;
+            }
+            if (!result.body.success) {
+                showToast(novaErrorMessage(result.body, 'Could not create playlist.'));
+                return null;
+            }
+            return result.body.playlist.playlist_id;
+        }
+
+        // Phase 5: playlist item removal. Like "Delete Playlist",
+        // "Remove" is `requires_confirmation: true` on the card, so
+        // `NovaDynamicUI` already confirmed before `onAction` fires here.
+        async function removePlaylistItemFlow(item) {
+            if (!item.playlist_id || !item.playlist_item_id) {
+                showToast('Missing playlist item id.');
+                return;
+            }
+            const result = await novaApiCall(
+                `/api/v1/youtube/playlists/${encodeURIComponent(item.playlist_id)}/items/${encodeURIComponent(item.playlist_item_id)}`,
+                { method: 'DELETE' }
+            );
+            if (!result) {
+                showToast('Connection error removing video.');
+                return;
+            }
+            if (!result.body.success) {
+                showToast(novaErrorMessage(result.body, 'Could not remove video.'));
+                return;
+            }
+            showToast(`Removed "${item.title || 'video'}" from playlist`);
+            dynamicUI.renderSingleCard(null);
+        }
+        // Phase 5: playlist deletion. `NovaDynamicUI` already asks for
+        // confirmation (the "Delete Playlist" action is
+        // `requires_confirmation: true`) before `onAction` is ever called
+        // here, so this just performs the delete and updates the panel.
+        async function deletePlaylistFlow(playlist) {
+            if (!playlist.playlist_id) {
+                showToast('Missing playlist id.');
+                return;
+            }
+            const result = await novaApiCall(`/api/v1/youtube/playlists/${encodeURIComponent(playlist.playlist_id)}`, {
+                method: 'DELETE',
+            });
+            if (!result) {
+                showToast('Connection error deleting playlist.');
+                return;
+            }
+            if (!result.body.success) {
+                showToast(novaErrorMessage(result.body, 'Could not delete playlist.'));
+                return;
+            }
+            showToast(`Deleted "${playlist.title || 'playlist'}"`);
+            dynamicUI.renderSingleCard(null);
+        }
+
+        function showVideoResult(card) {
+            novaPanel.classList.add('active');
+            dynamicUI.renderSingleCard(card);
+            if (card && card.data && card.data.video_id) {
+                novaPlayer.loadVideo(card.data.video_id, { autoplay: true });
+            }
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            statusText.innerText = "Speech API Not Supported";
+            transcript.innerText = "Please use Google Chrome or Edge";
+        } else {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            micBtn.addEventListener('click', () => {
+                try {
+                    recognition.start();
+                } catch(e) {
+                    console.log("Recognition already active");
+                }
+            });
+
+            recognition.onstart = () => {
+                micBtn.classList.add('listening');
+                statusText.innerText = "Listening to your voice...";
+                transcript.innerText = "...";
+                waveBars.classList.add('active');
+            };
+
+            recognition.onresult = async (event) => {
+                const commandText = event.results[0][0].transcript;
+                transcript.innerText = `"${commandText}"`;
+                statusText.innerText = "Processing Neural Command...";
+                waveBars.classList.remove('active');
+
+                try {
+                    await sendAgentCommand(commandText);
+                } catch (err) {
+                    statusText.innerText = "Connection Error";
+                }
+            };
+
+            // Phase 9: shared by the initial command and by a later
+            // confirm/cancel reply to a `confirmation_required` result -
+            // both just POST to the same legacy `/agent` route, the second
+            // time with `confirm` set and no new command text (the agent
+            // already knows what it's confirming from server-side session
+            // state - see app.agent.state.AgentState.pending_confirmation).
+            async function sendAgentCommand(commandText, confirm) {
+                const body = confirm === undefined ? { command: commandText } : { command: '', confirm };
+                const response = await fetch('/agent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+
+                if (data.success && data.action_type === 'youtube_play' && data.data && data.data.card) {
+                    statusText.innerText = data.message || "Found a video";
+                    showVideoResult(data.data.card);
+                } else if (data.action_type === 'confirmation_required') {
+                    statusText.innerText = data.message || "This needs your confirmation.";
+                    const ok = window.confirm(data.message || "Go ahead?");
+                    await sendAgentCommand('', ok);
+                } else if (data.data && data.data.card) {
+                    // Any other card type the planner surfaces - a
+                    // playlist, or (Task 10) a single Gmail message/
+                    // thread/draft card (e.g. from "read the latest
+                    // email"). The renderer already handles every `type`
+                    // generically (see static/js/dynamic-actions.js); this
+                    // just picks which panel/instance to render into so
+                    // Gmail cards land in the Gmail workspace
+                    // (`novaGmailPanel`/`gmailUI`) instead of the YouTube
+                    // panel they used to fall into by default.
+                    statusText.innerText = data.message || "Here you go";
+                    if (String(data.data.card.type || '').startsWith('gmail')) {
+                        novaGmailPanel.classList.add('active');
+                        gmailUI.renderSingleCard(data.data.card);
+                        // Task 12: "write an email" / "draft an email to
+                        // John saying ..." should land on an editable
+                        // compose form inside Nova, not just a card the
+                        // user then has to tap "Edit Draft" on.
+                        if (data.data.card.type === 'gmail_draft') {
+                            openGmailComposer(data.data.card.data || {});
+                        }
+                    } else {
+                        novaPanel.classList.add('active');
+                        dynamicUI.renderSingleCard(data.data.card);
+                    }
+                } else if (String(data.action_type || '').startsWith('gmail')) {
+                    // Task 06: dedicated Gmail routing condition, still in
+                    // place ahead of the generic `data.success && data.url`
+                    // fallback below - Gmail can never reach that
+                    // external-open handler regardless of what fields a
+                    // result carries.
+                    //
+                    // Task 08: renders into the dedicated Gmail workspace
+                    // panel (`#novaGmailPanel`/`novaGmailCardsEl`), not the
+                    // YouTube panel - each keeps its own container/state
+                    // (Tasks 14/15), no `window.open`/`window.location`, no
+                    // iframe to mail.google.com. A single-card result
+                    // (`gmail_message`, `gmail_thread`, `gmail_draft`) is
+                    // handled by the `data.data.card` branch above, which
+                    // (Task 10) now also routes to this same Gmail workspace
+                    // when `card.type` is Gmail-flavored. This branch
+                    // covers the list case (`gmail_message_list`'s
+                    // `data.cards`, plural) via `gmailUI.renderCards`, and
+                    // Task 09's explicit `gmail_workspace_open` (a bare
+                    // "Open Gmail" command) by revealing the panel even
+                    // with no cards yet - an empty workspace, not nothing.
+                    statusText.innerText = data.message || "Gmail action complete.";
+                    if (data.action_type === 'gmail_workspace_open') {
+                        novaGmailPanel.classList.add('active');
+                        // "Open Gmail": if a Google account is already
+                        // connected, load the inbox straight into the
+                        // workspace instead of leaving it empty; if not,
+                        // point at the Connect button instead of a dead-end
+                        // "connect your account" message with no action.
+                        if (novaGoogleConnected) {
+                            loadGmailInboxIntoWorkspace();
+                        } else {
+                            flashGoogleConnectButton();
+                        }
+                    } else if (!data.success && isGoogleConnectionMessage(data.message)) {
+                        flashGoogleConnectButton();
+                    }
+                    if (data.data && Array.isArray(data.data.cards) && data.data.cards.length) {
+                        novaGmailPanel.classList.add('active');
+                        gmailUI.renderCards(data.data.cards);
+                    }
+                } else if (data.success && data.url) {
+                    statusText.innerText = data.message || "Executing Action...";
+                    // Every Gmail-flavored result is now caught by the
+                    // dedicated branch above before reaching here, so this
+                    // remains a plain external-open fallback for any other
+                    // (non-Gmail) action type that supplies a bare `url`
+                    // with no `data.card` - unchanged from before Task 04/06.
+                    setTimeout(() => {
+                        window.open(data.url, '_blank');
+                    }, 600);
+                } else if (data.message) {
+                    // Plain conversational reply from the agent (no card/
+                    // url involved) - e.g. a clarifying question, a
+                    // "sent" confirmation, or an "I couldn't do that".
+                    statusText.innerText = data.message;
+                    if (data.success === false && isGoogleConnectionMessage(data.message)) {
+                        flashGoogleConnectButton();
+                    }
+                } else {
+                    statusText.innerText = "Command Unknown / Failed";
+                }
+            }
+
+            recognition.onerror = () => {
+                statusText.innerText = "Error Occurred. Try Again.";
+                micBtn.classList.remove('listening');
+                waveBars.classList.remove('active');
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('listening');
+                waveBars.classList.remove('active');
+                if (statusText.innerText === "Listening to your voice...") {
+                    statusText.innerText = "Ready for input";
+                }
+            };
+        }
+    </script>
+</body>
+</html>
