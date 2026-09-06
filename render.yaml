@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: nova-ai
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: FLASK_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: LOG_LEVEL
+        value: INFO
+      - key: LLM_PROVIDER
+        value: none
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
+      - key: OLLAMA_BASE_URL
+        sync: false
+      - key: OLLAMA_MODEL
+        value: qwen2.5:3b
+      - key: LLM_MAX_RETRIES
+        value: "3"
+      - key: AGENT_MAX_TOOL_ITERATIONS
+        value: "5"
+      - key: AGENT_LLM_TIMEOUT_SECONDS
+        value: "20"
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: GOOGLE_SCOPES
+        value: "openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.compose"
+      - key: TOKEN_ENCRYPTION_KEY
+        generateValue: true
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: YOUTUBE_SEARCH_CACHE_TTL_SECONDS
+        value: "300"
